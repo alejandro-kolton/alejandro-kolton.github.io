@@ -75,14 +75,27 @@ def parse(entry):
     if not any(is_me(a) for a in authors):
         return None
     arxiv_id = re.sub(r"v\d+$", "", text(entry, "a:id").split("/abs/")[-1])
+    arxiv_year = text(entry, "a:published")[:4]
+    journal = text(entry, "x:journal_ref")
     return {
         "id": arxiv_id,
-        "year": text(entry, "a:published")[:4],
+        "year": journal_year(journal, arxiv_year),
         "title": text(entry, "a:title"),
         "authors": authors,
-        "journal": text(entry, "x:journal_ref"),
+        "journal": journal,
         "doi": text(entry, "x:doi"),
     }
+
+
+def journal_year(journal, arxiv_year):
+    """Año de publicación en la revista; si no se puede leer, el de arXiv."""
+    years = re.findall(r"\((\d{4})\)", journal) or re.findall(r"\b(?:19|20)\d{2}\b", journal)
+    for y in reversed(years):
+        # descarta números que no son años (volúmenes, páginas); acepta años
+        # anteriores a arXiv por las actas que se suben después de publicadas
+        if int(arxiv_year) - 5 <= int(y) <= int(arxiv_year) + 3:
+            return y
+    return arxiv_year
 
 
 def render_authors(authors):
