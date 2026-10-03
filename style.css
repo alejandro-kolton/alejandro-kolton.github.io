@@ -145,3 +145,8 @@ nav { display: flex; flex-wrap: wrap; align-items: center; row-gap: .3rem; }
 nav .nav-sep { width: 1px; height: 1.1em; background: var(--border); margin-left: 1.2rem; }
 nav a.offduty { font-style: italic; }
 .aside { margin-top: 2.5rem; font-size: .92rem; color: var(--muted); border-top: 1px dashed var(--border); padding-top: 1rem; }
+
+/* Foto destacada a todo el ancho en la galería */
+.photos { grid-template-columns: repeat(2, 1fr); }
+.photos figure.wide { grid-column: 1 / -1; }
+@media (max-width: 560px) { .photos { grid-template-columns: 1fr; } }
