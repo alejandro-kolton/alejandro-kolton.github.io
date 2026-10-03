@@ -1,0 +1,35 @@
+# Actualiza la lista de publicaciones desde arXiv una vez por semana.
+# También se puede correr a mano: pestaña "Actions" → "Update publications" → "Run workflow".
+name: Update publications
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"   # lunes 09:00 UTC (06:00 en Argentina)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generar lista desde arXiv
+        run: python3 scripts/update_pubs.py
+
+      - name: Commit si hubo cambios
+        run: |
+          if git diff --quiet; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Actualizar publicaciones desde arXiv"
+          git push
