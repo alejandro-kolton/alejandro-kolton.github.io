@@ -160,7 +160,7 @@ ul.timeline + dl.info { margin-top: 1rem; }
 /* Párrafo con una foto chica al costado */
 .text-photo { display: flex; gap: 1.2rem; align-items: flex-start; }
 .text-photo p { flex: 1; margin-top: 0; }
-.text-photo figure { margin: 0; width: 180px; flex-shrink: 0; }
+.text-photo figure { margin: 0; width: 130px; flex-shrink: 0; }
 .text-photo img { width: 100%; height: auto; border-radius: 6px; display: block; }
 .text-photo figcaption { font-size: .9rem; color: var(--muted); margin-top: .3rem; }
 @media (max-width: 560px) {
