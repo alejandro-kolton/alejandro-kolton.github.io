@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demos · A. B. Kolton</title>
+  <meta name="description" content="Simulaciones interactivas de Alejandro B. Kolton, hechas con p5.js: material didáctico, ilustraciones de investigación y sketches por diversión.">
+  <link rel="alternate" hreflang="en" href="../demos.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="site">
+    <div class="container">
+      <a class="brand" href="index.html">A. B. Kolton</a>
+      <nav>
+        <a href="index.html">Inicio</a>
+        <a href="publications.html">Publicaciones</a>
+        <a href="talks.html">Charlas</a>
+        <a href="demos.html" class="active">Demos</a>
+        <span class="nav-sep" aria-hidden="true"></span>
+        <a href="beyond.html" class="offduty">Más allá de la investigación</a>
+        <a href="../demos.html" class="lang" hreflang="en" lang="en" title="English version">EN</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Demos</h1>
+    <p class="muted">Simulaciones interactivas hechas con <a href="https://p5js.org">p5.js</a>: algunas son material didáctico, otras ilustran temas en los que trabajo en investigación, y otras son simplemente por diversión. Hacé clic en cualquier tarjeta para correrla en el navegador.</p>
+
+    <!-- Para agregar un nuevo demo: crear su carpeta en /demos/<slug>/ (index.html + sketch.js
+         + assets), una miniatura en /img/demos/<slug>-thumb.jpg, y copiar una tarjeta <a class="demo-card">
+         abajo, en la categoría que corresponda. Acordate de agregarlo también en demos.html. -->
+
+    <h2 id="research">Simulaciones de investigación</h2>
+    <p class="muted">Próximamente — modelos de juguete que ilustran problemas en los que trabajo (ej. depinning de una interfaz elástica en un medio desordenado).</p>
+
+    <h2 id="teaching">Docencia</h2>
+    <div class="demo-grid">
+      <a class="demo-card" href="../demos/ising-2d/index.html">
+        <img src="../img/demos/ising-2d-thumb.jpg" alt="Grilla de cuadrados blancos y negros que representan espines arriba y abajo en el modelo de Ising 2D" loading="lazy">
+        <h3>Modelo de Ising 2D</h3>
+        <p>Simulación Monte Carlo Metropolis del modelo de Ising en una red cuadrada. Ajustá la temperatura y un campo externo, alterná entre acople ferro y antiferromagnético, y mirá formarse y derretirse los dominios. Hecho para la materia Mecánica Estadística del Instituto Balseiro.</p>
+      </a>
+      <a class="demo-card" href="../demos/dzhanibekov/index.html">
+        <img src="../img/demos/dzhanibekov-thumb.jpg" alt="Representación 3D de un cuerpo rígido girando, ilustrando el teorema del eje intermedio" loading="lazy">
+        <h3>Efecto Dzhanibekov — cuerpo rígido libre</h3>
+        <p>Un cuerpo rígido en rotación libre, integrado a partir de las ecuaciones de Euler. Fijá las velocidades angulares iniciales y mirá cómo la inestabilidad del eje intermedio (el "efecto raqueta de tenis") da vuelta al cuerpo en pleno vuelo. Hecho para la materia Mecánica Analítica del Instituto Balseiro.</p>
+      </a>
+    </div>
+
+    <h2 id="fun">Por diversión</h2>
+    <div class="demo-grid">
+      <a class="demo-card" href="../demos/argentina-en-la-luna/index.html">
+        <img src="../img/demos/argentina-en-la-luna-thumb.jpg" alt="Contorno de las fronteras de Argentina trazado sobre la superficie de la Luna" loading="lazy">
+        <h3>Argentina por el sistema solar</h3>
+        <p>El contorno de Argentina, trazado punto por punto y superpuesto sobre un globo que gira — la Luna, el Sol o cualquier planeta que elijas — usando a Argentina como unidad visual de escala.</p>
+      </a>
+    </div>
+  </main>
+
+  <footer class="site">
+    <div class="container">© Alejandro B. Kolton</div>
+  </footer>
+</body>
+</html>
