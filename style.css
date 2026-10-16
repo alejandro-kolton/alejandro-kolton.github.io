@@ -164,6 +164,10 @@ ul.timeline + dl.info { margin-top: 1rem; }
 .demo-card img { width: 100%; height: 140px; object-fit: cover; display: block; background: var(--border); }
 .demo-card h3 { margin: .7rem .8rem .2rem; font-size: 1rem; }
 .demo-card p { margin: 0 .8rem .8rem; font-size: .9rem; color: var(--muted); }
+/* Para una tarjeta con un link extra (ej. un video), envolverla en
+   .demo-card-wrap junto con un <p class="demo-card-extra"> aparte,
+   ya que un <a> no puede contener otro <a> anidado. */
+.demo-card-extra { margin: .4rem .2rem 0; font-size: .85rem; }
 
 /* Párrafo con una foto chica al costado */
 .text-photo { display: flex; gap: 1.2rem; align-items: flex-start; }
