@@ -1,0 +1,567 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<title>Pared φ⁴ en vivo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: instrument bench. Field canvas + velocity trace on the left, control rack on the right; stacks on phones. */
+:root {
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --ink: #17202c;
+  --muted: #5b6777;
+  --line: #d6dce4;
+  --accent: #d4531c;
+  --trace: #233f6e;
+  --ok: #2d7a4c;
+  --busy: #a86b12;
+  --display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141b; --surface: #171e28; --ink: #e5eaf0; --muted: #98a4b4; --line: #2a3442;
+    --accent: #f27c47; --trace: #8db2e8; --ok: #5cc58a; --busy: #e2b04d; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141b; --surface: #171e28; --ink: #e5eaf0; --muted: #98a4b4; --line: #2a3442;
+  --accent: #f27c47; --trace: #8db2e8; --ok: #5cc58a; --busy: #e2b04d; color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header { display: flex; flex-direction: column; gap: 6px; }
+.topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex: none; }
+.lang button { border: 0; border-radius: 0; padding: 3px 11px; font: 500 12px var(--mono); letter-spacing: 0.06em; background: transparent; color: var(--muted); }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(30px, 4.2vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+.lede { margin: 0; max-width: 68ch; color: var(--muted); }
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+#field { width: 100%; line-height: 0; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); background: #dde3ea; }
+#field canvas { display: block; width: 100% !important; height: auto !important; image-rendering: pixelated; }
+.readouts { display: flex; flex-wrap: wrap; gap: 6px 22px; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; align-items: center; }
+.readouts span b { font-weight: 500; color: var(--ink); }
+.readouts span { color: var(--muted); }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-family: var(--mono); font-size: 12px; border: 1px solid currentColor; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip[data-s="moving"] { color: var(--accent); }
+.chip[data-s="pinned"] { color: var(--ok); }
+.chip[data-s="busy"] { color: var(--busy); }
+.chip[data-s="paused"] { color: var(--muted); }
+.trace { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px 6px; }
+.trace-head { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+#chart { width: 100%; height: 96px; display: block; }
+.rack { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.group { display: flex; flex-direction: column; gap: 8px; }
+.group + .group { border-top: 1px solid var(--line); padding-top: 14px; }
+.label { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 500; gap: 8px; }
+.label output, .label .val { font-family: var(--mono); font-weight: 400; font-variant-numeric: tabular-nums; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+input[type=number], select { font: 13px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; }
+input[type=number] { width: 92px; }
+select { width: 100%; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.row > * { flex: 1 1 auto; }
+button { font: 500 13px var(--body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 7px 10px; cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:disabled, input:disabled, select:disabled { opacity: 0.45; cursor: not-allowed; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; }
+.small { font-size: 12px; color: var(--muted); margin: 0; }
+.log { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; max-height: 168px; overflow-y: auto; }
+.log li { display: flex; justify-content: space-between; gap: 8px; }
+.log .pin { color: var(--ok); }
+.log .esc { color: var(--accent); }
+.result { font-family: var(--mono); font-size: 13px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px 32px; border-top: 1px solid var(--line); padding-top: 18px; }
+.notes h2 { font-family: var(--display); font-weight: 600; font-size: 21px; margin: 0 0 6px; }
+.notes p { margin: 0 0 8px; max-width: 62ch; color: var(--ink); }
+.notes code, .eq { font-family: var(--mono); font-size: 13px; }
+.eq { display: block; padding: 8px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 5px; margin: 6px 0 10px; overflow-x: auto; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+.demo-back {
+  position: fixed; top: 8px; right: 8px; z-index: 1000;
+  font: 13px/1.4 system-ui, sans-serif;
+}
+.demo-back a {
+  display: inline-block; padding: .25rem .6rem; border-radius: 4px;
+  background: rgba(0,0,0,.55); color: #fff; text-decoration: none;
+}
+.demo-back a:hover { background: rgba(0,0,0,.75); }
+</style>
+</head>
+<body>
+<div class="demo-back"><a href="../../demos.html">← Demos</a></div>
+
+<div class="wrap">
+  <header>
+    <div class="topline">
+      <span class="eyebrow" data-i18n="eyebrow">VMC · campo φ⁴ · depinning</span>
+      <div class="lang" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="es" aria-pressed="true">ES</button><button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <h1 data-i18n="title">Pared φ⁴ en vivo</h1>
+    <p class="lede" data-i18n="lede">Una pared entre las fases φ = +1 y φ = −1, empujada por un campo h contra un desorden congelado. Es el mismo movimiento elemental que el código en GPU, en una red chica que corre en el navegador.</p>
+  </header>
+
+  <div class="bench">
+    <div class="stage">
+      <div id="field" role="img" data-i18n-aria="fieldAria" aria-label="Campo φ sobre la red: azul es φ ≈ +1, gris claro es φ ≈ −1; la línea naranja es la pared u(x)"></div>
+      <div class="readouts">
+        <span class="chip" id="status" data-s="moving">moviéndose</span>
+        <span>h <b id="ro-h">0.0210</b></span>
+        <span>⟨u⟩ <b id="ro-u">0</b></span>
+        <span>w <b id="ro-w">0</b></span>
+        <span>v <b id="ro-v">0</b> <span data-i18n="rowsPerSweep">filas/barrido</span></span>
+        <span><span data-i18n="sweepsLbl">barridos</span> <b id="ro-n">0</b></span>
+        <span><span data-i18n="sampleLbl">muestra</span> <b id="ro-seed">1</b></span>
+      </div>
+      <div class="trace">
+        <div class="trace-head"><span data-i18n="traceHead">velocidad de la pared, d⟨u⟩/d(barrido)</span><span id="vmax"></span></div>
+        <canvas id="chart" data-i18n-aria="chartAria" aria-label="Velocidad de la pared en el tiempo"></canvas>
+      </div>
+    </div>
+
+    <aside class="rack">
+      <div class="group">
+        <div class="label"><label for="h-range" data-i18n="hLbl">Campo h</label><input type="number" id="h-num" min="0" max="0.08" step="0.0001" value="0.021" data-i18n-aria="hLbl" aria-label="Campo h"></div>
+        <input type="range" id="h-range" min="0" max="0.08" step="0.0001" value="0.021">
+        <div class="label"><label for="d-range" data-i18n="dLbl">Desorden Δ</label><output id="d-out">0.20</output></div>
+        <input type="range" id="d-range" min="0" max="1" step="0.01" value="0.2">
+        <div class="label"><label for="blocks" data-i18n="blocksLbl">Bloques de desorden</label></div>
+        <select id="blocks">
+          <option value="1x1" data-i18n="opt1x1">1×1, isótropo</option>
+          <option value="8x1" data-i18n="opt8x1" selected>8×1, a lo largo de la pared</option>
+          <option value="4x1" data-i18n="opt4x1">4×1, a lo largo de la pared</option>
+          <option value="1x8" data-i18n="opt1x8">1×8, en la dirección de avance</option>
+          <option value="2x2" data-i18n="opt2x2">2×2, cuadrados</option>
+        </select>
+        <div class="row">
+          <button id="preset-iso" type="button" data-i18n="presetIso">Isótropo, Δ = 0.2</button>
+          <button id="preset-8x1" type="button">8×1, Δ = 0.2</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label"><label for="size" data-i18n="sizeLbl">Tamaño L × L<sub>y</sub></label></div>
+        <select id="size">
+          <option value="128">128 × 96</option>
+          <option value="256" selected>256 × 128</option>
+          <option value="512">512 × 160</option>
+        </select>
+        <div class="label"><label for="speed" data-i18n="speedLbl">Velocidad</label><span class="val" id="speed-out"></span></div>
+        <input type="range" id="speed" min="0" max="100" step="1" value="48">
+        <label class="check"><input type="checkbox" id="show-dis"> <span data-i18n="showDis">Mostrar el desorden</span></label>
+        <div class="row">
+          <button id="pause" type="button">Pausar</button>
+          <button id="flat" type="button" data-i18n="flatBtn">Pared plana</button>
+          <button id="sample" type="button" data-i18n="sampleBtn">Otra muestra</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <button id="bisect" class="primary" type="button">Buscar h_d</button>
+        <p class="small" data-i18n="bisHelp">Bisección en h desde la pared plana. Cada prueba termina anclada o con toda la fila y<sub>0</sub> + 64 dada vuelta. Al final queda la pared crítica.</p>
+        <ul class="log" id="bis-log" aria-live="polite"></ul>
+        <div class="result" id="bis-result"></div>
+        <ul class="log" id="history"></ul>
+      </div>
+    </aside>
+  </div>
+
+  <section class="notes">
+    <div>
+      <h2 data-i18n="n1h">El modelo</h2>
+      <span class="eq">∂ₜφ = ∇²φ + (1 + r) φ − φ³ + h</span>
+      <p data-i18n="n1p1">Red cuadrada, Laplaciano de 5 puntos, c = ε₀ = 1. El desorden <code>r</code> es uniforme en [−Δ, Δ] y constante sobre bloques AX × AY: con 8×1 los bloques son largos a lo largo de la pared, el caso donde medimos geometría de qKPZ.</p>
+      <p data-i18n="n1p2">Periódico en x. Abajo y arriba las filas fantasma valen +1 y −1, así que hay una sola pared.</p>
+    </div>
+    <div>
+      <h2 data-i18n="n2h">El movimiento VMC</h2>
+      <p data-i18n="n2p1">No se integra en el tiempo. Con los cuatro vecinos fijos, la condición ∂ₜφ = 0 en un sitio es una cúbica:</p>
+      <span class="eq" data-i18n="eq2">φ³ + p φ − q = 0,  p = 3 − r,  q = Σ φ_vecinos + h</span>
+      <p data-i18n="n2p2">El sitio salta a la raíz estable de su cuenca (Cardano o Vieta). Primero los sitios pares, después los impares: eso es un barrido. Solo se actualizan las filas vecinas a las que cambiaron en el medio barrido anterior.</p>
+    </div>
+    <div>
+      <h2 data-i18n="n3h">Anclada, despinneada, h_d</h2>
+      <p data-i18n="n3p1">La pared está anclada cuando ningún sitio cambia más de 10⁻⁶ durante 50 barridos. Si la pared pasa el 60 % del alto, la ventana sube con ella; el desorden de cada fila depende de su altura absoluta, así que la muestra es la misma.</p>
+      <p data-i18n="n3p2">Los h_d de acá son de L chicos y quedan por encima de los asintóticos: con Δ = 0.2, h_d ≈ 0.008 isótropo y ≈ 0.018 con bloques 8×1 a L grande. A diferencia del código en GPU, los bordes en y son fijos en vez de antiperiódicos y la caja no escala con κ.</p>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<script>
+(() => {
+  const C = { y0: 20, P: 64, tolH: 1e-4, hHi: 0.2, cap: 100000, act: 1e-7, pinTol: 1e-6, pinRun: 50, budget: 12 };
+  const LYof = { 128: 96, 256: 128, 512: 160 };
+  const S = {
+    L: 256, LY: 128, phi: null, pA: null, rowCh: null, rowNx: null, u: null,
+    seed: 1, h: 0.021, D: 0.2, AX: 8, AY: 1, off: 0,
+    sweeps: 0, running: true, quiet: 0, speed: 20, showDis: false,
+    uMean: 0, uW: 0, vel: 0, lastU: null, lastN: 0, vHist: [], bis: null, history: []
+  };
+  const $ = id => document.getElementById(id);
+
+  // i18n: Spanish static text is read from the page itself; English static text and all dynamic strings live here
+  const I18N = {
+    es: {
+      moving: 'moviéndose', pinned: 'anclada', paused: 'en pausa', searching: 'buscando h_d · prueba h = ',
+      depinned: 'despinneó', pause: 'Pausar', resume: 'Seguir', find: 'Buscar h_d', cancel: 'Cancelar búsqueda',
+      perFrame: 'barridos/cuadro', scale: 'escala', noDepin: 'no despinneó hasta h = ', critical: 'queda la pared crítica',
+      cancelled: 'búsqueda cancelada', locale: 'es-AR',
+      names: { '1x1': 'isótropo', '8x1': '8×1', '4x1': '4×1', '1x8': '1×8', '2x2': '2×2' }
+    },
+    en: {
+      moving: 'moving', pinned: 'pinned', paused: 'paused', searching: 'searching h_d · trial h = ',
+      depinned: 'depinned', pause: 'Pause', resume: 'Resume', find: 'Find h_d', cancel: 'Cancel search',
+      perFrame: 'sweeps/frame', scale: 'scale', noDepin: 'did not depin up to h = ', critical: 'critical wall left',
+      cancelled: 'search cancelled', locale: 'en-US',
+      names: { '1x1': 'isotropic', '8x1': '8×1', '4x1': '4×1', '1x8': '1×8', '2x2': '2×2' },
+      eyebrow: 'VMC · φ⁴ field · depinning',
+      title: 'φ⁴ wall, live',
+      lede: 'A wall between the φ = +1 and φ = −1 phases, pushed by a field h against quenched disorder. It is the same elementary move as the GPU code, on a small lattice that runs in the browser.',
+      fieldAria: 'Field φ on the lattice: blue is φ ≈ +1, light grey is φ ≈ −1; the orange line is the wall u(x)',
+      rowsPerSweep: 'rows/sweep', sweepsLbl: 'sweeps', sampleLbl: 'sample',
+      traceHead: 'wall velocity, d⟨u⟩/d(sweep)', chartAria: 'Wall velocity over time',
+      hLbl: 'Field h', dLbl: 'Disorder Δ', blocksLbl: 'Disorder blocks',
+      opt1x1: '1×1, isotropic', opt8x1: '8×1, along the wall', opt4x1: '4×1, along the wall',
+      opt1x8: '1×8, along the direction of motion', opt2x2: '2×2, square',
+      presetIso: 'Isotropic, Δ = 0.2', sizeLbl: 'Size L × L<sub>y</sub>', speedLbl: 'Speed',
+      showDis: 'Show the disorder', flatBtn: 'Flat wall', sampleBtn: 'New sample',
+      bisHelp: 'Bisection in h from the flat wall. Each trial ends pinned or with the whole row y<sub>0</sub> + 64 flipped. The critical wall is left at the end.',
+      n1h: 'The model',
+      n1p1: 'Square lattice, 5-point Laplacian, c = ε₀ = 1. The disorder <code>r</code> is uniform in [−Δ, Δ] and constant over AX × AY blocks: with 8×1 the blocks are elongated along the wall, the case where we measure qKPZ geometry.',
+      n1p2: 'Periodic in x. The ghost rows below and above are fixed at +1 and −1, so there is a single wall.',
+      n2h: 'The VMC move',
+      n2p1: 'There is no time integration. With its four neighbours fixed, the condition ∂ₜφ = 0 at a site is a cubic:',
+      eq2: 'φ³ + p φ − q = 0,  p = 3 − r,  q = Σ φ_neighbours + h',
+      n2p2: 'The site jumps to the stable root of its basin (Cardano or Vieta). Even sites first, then odd ones: that is one sweep. Only the rows next to those that changed in the previous half-sweep are updated.',
+      n3h: 'Pinned, depinned, h_d',
+      n3p1: 'The wall is pinned when no site changes by more than 10⁻⁶ during 50 sweeps. When the wall passes 60 % of the height, the window moves up with it; the disorder of each row depends on its absolute height, so the sample stays the same.',
+      n3p2: 'The h_d values here are for small L and lie above the asymptotic ones: with Δ = 0.2, h_d ≈ 0.008 isotropic and ≈ 0.018 with 8×1 blocks at large L. Unlike the GPU code, the y boundaries are fixed instead of antiperiodic, and the box does not scale with κ.'
+    }
+  };
+  for (const el of document.querySelectorAll('[data-i18n]')) I18N.es[el.dataset.i18n] = el.innerHTML;
+  for (const el of document.querySelectorAll('[data-i18n-aria]')) I18N.es[el.dataset.i18nAria] = el.getAttribute('aria-label');
+  let lang = 'es';
+  try { lang = localStorage.getItem('pared-phi4-lang') || ''; } catch (e) { lang = ''; }
+  if (!I18N[lang]) lang = /^es\b/i.test(navigator.language || '') ? 'es' : 'en';
+  const t = k => I18N[lang][k];
+
+  function hash3(a, b, s) {
+    let h = Math.imul(a ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(b ^ 0x7f4a7c15, 0xc2b2ae35) ^ Math.imul(s, 0x27d4eb2f);
+    h ^= h >>> 15; h = Math.imul(h, 0x2c1b3c6d); h ^= h >>> 12; h = Math.imul(h, 0x297a2d39); h ^= h >>> 15;
+    return (h >>> 0) / 4294967296;
+  }
+  function buildP() {
+    const { L, LY, D, AX, AY, seed, off, pA } = S;
+    for (let y = 0; y < LY; y++) {
+      const by = Math.floor((y + off) / AY);
+      for (let x = 0; x < L; x++) pA[y * L + x] = 3 - D * (2 * hash3(Math.floor(x / AX), by, seed) - 1);
+    }
+  }
+  function markAll() { S.rowCh.fill(1); S.quiet = 0; }
+  function alloc() {
+    const N = S.L * S.LY;
+    S.phi = new Float64Array(N); S.pA = new Float64Array(N);
+    S.rowCh = new Uint8Array(S.LY); S.rowNx = new Uint8Array(S.LY); S.u = new Float64Array(S.L);
+  }
+  function flatWall() {
+    S.off = 0;
+    for (let y = 0; y < S.LY; y++) {
+      const v = Math.tanh((C.y0 - y) / Math.SQRT2);
+      S.phi.fill(v, y * S.L, (y + 1) * S.L);
+    }
+    buildP(); markAll(); S.lastU = null; S.vel = 0;
+  }
+
+  function halfSweep(c) {
+    const { L, LY, phi, pA, rowCh, rowNx, h } = S;
+    let maxd = 0; rowNx.fill(0);
+    for (let y = 0; y < LY; y++) {
+      if (!(rowCh[y] || (y > 0 && rowCh[y - 1]) || (y < LY - 1 && rowCh[y + 1]))) continue;
+      const b = y * L, top = y < LY - 1, bot = y > 0;
+      let ch = 0;
+      for (let x = (c + y) & 1; x < L; x += 2) {
+        const i = b + x;
+        const s = phi[x > 0 ? i - 1 : b + L - 1] + phi[x < L - 1 ? i + 1 : b] + (top ? phi[i + L] : -1) + (bot ? phi[i - L] : 1);
+        const p = pA[i], Q = p / 3, R = (s + h) / 2, Dd = Q * Q * Q + R * R;
+        let v;
+        if (Dd >= 0) { const sd = Math.sqrt(Dd); v = Math.cbrt(R + sd) + Math.cbrt(R - sd); }
+        else {
+          const m = 2 * Math.sqrt(-Q), a = Math.min(1, Math.max(-1, R / Math.sqrt(-Q * Q * Q))), th = Math.acos(a);
+          const mid = m * Math.cos((th + 4 * Math.PI) / 3);
+          v = phi[i] > mid ? m * Math.cos(th / 3) : m * Math.cos((th + 2 * Math.PI) / 3);
+        }
+        const d = Math.abs(v - phi[i]);
+        if (d > maxd) maxd = d;
+        if (d > C.act) ch = 1;
+        phi[i] = v;
+      }
+      if (ch) rowNx[y] = 1;
+    }
+    S.rowNx = rowCh; S.rowCh = rowNx;
+    return maxd;
+  }
+  function sweep() { const a = halfSweep(0), b = halfSweep(1); S.sweeps++; return Math.max(a, b); }
+
+  function measure() {
+    const { L, LY, phi, u } = S;
+    let sum = 0, sq = 0;
+    for (let x = 0; x < L; x++) {
+      let y = 0;
+      while (y < LY && phi[y * L + x] > 0) y++;
+      let ux;
+      if (y === 0) ux = 0; else if (y === LY) ux = LY - 1;
+      else { const a = phi[(y - 1) * L + x], b = phi[y * L + x]; ux = y - 1 + a / (a - b); }
+      u[x] = ux; sum += ux; sq += ux * ux;
+    }
+    S.uMean = sum / L; S.uW = Math.sqrt(Math.max(0, sq / L - S.uMean * S.uMean));
+  }
+  function comove() {
+    if (S.bis || S.uMean < 0.6 * S.LY) return;
+    const s = Math.floor(S.uMean - 0.35 * S.LY), { L, LY, phi } = S;
+    phi.copyWithin(0, s * L); phi.fill(-1, (LY - s) * L);
+    S.off += s; buildP(); markAll();
+  }
+  function escaped() {
+    const { L, phi } = S, b = (C.y0 + C.P) * L;
+    for (let x = 0; x < L; x++) if (phi[b + x] <= 0) return false;
+    return true;
+  }
+
+  function step() {
+    const t0 = performance.now(), maxN = S.bis ? Infinity : S.speed;
+    let n = 0;
+    while (n < maxN && performance.now() - t0 < C.budget) {
+      const m = sweep(); n++;
+      S.quiet = m < C.pinTol ? S.quiet + 1 : 0;
+      if (S.bis) {
+        S.bis.sweeps++;
+        if (escaped()) { bisResult(false); break; }
+        if (S.quiet >= C.pinRun) { bisResult(true); break; }
+        if (S.bis.sweeps > C.cap) { bisResult(false); break; }
+      } else if (S.quiet >= C.pinRun) break;
+    }
+  }
+
+  // bisection, as run_batch / the solver: warm start from the last pinned state (Middleton's no-passing)
+  function startBis() {
+    flatWall(); S.vHist.length = 0;
+    S.bis = { lo: 0, hi: C.hHi, h: 0, base: S.phi.slice(), sweeps: 0, log: [] };
+    S.running = true; renderLog(); nextTrial(); syncUI();
+  }
+  function nextTrial() {
+    const B = S.bis;
+    if (B.hi - B.lo <= C.tolH) return finishBis();
+    B.h = (B.lo + B.hi) / 2; S.h = B.h; S.phi.set(B.base); markAll(); B.sweeps = 0; S.lastU = null;
+    setH(S.h, false);
+  }
+  function bisResult(pinned) {
+    const B = S.bis;
+    B.log.unshift({ h: B.h, pinned, n: B.sweeps });
+    if (pinned) { B.lo = B.h; B.base = S.phi.slice(); } else B.hi = B.h;
+    renderLog(); nextTrial();
+  }
+  function finishBis() {
+    const B = S.bis, hd = (B.lo + B.hi) / 2;
+    const none = B.lo >= C.hHi - C.tolH;
+    S.result = { none, hd, err: (B.hi - B.lo) / 2 }; renderResult();
+    S.history.unshift({ blocks: $('blocks').value, D: S.D, L: S.L, seed: S.seed, none, hd, err: S.result.err });
+    S.history.length = Math.min(S.history.length, 8);
+    renderHistory();
+    S.phi.set(B.base); S.h = B.lo; S.bis = null; markAll(); setH(S.h, false); syncUI();
+  }
+  function cancelBis() { S.bis = null; S.result = { cancelled: true }; renderResult(); syncUI(); }
+  function resultText(r) {
+    return r.none ? t('noDepin') + C.hHi : `h_d = ${r.hd.toFixed(5)} ± ${r.err.toFixed(5)}`;
+  }
+  function renderResult() {
+    const r = S.result;
+    $('bis-result').textContent = !r ? '' : r.cancelled ? t('cancelled') : resultText(r) + ' · ' + t('critical');
+  }
+  function renderHistory() {
+    $('history').innerHTML = S.history.map(e =>
+      `<li><span>${t('names')[e.blocks]} · Δ ${e.D.toFixed(2)} · L ${e.L} · #${e.seed} → ${resultText(e)}</span></li>`).join('');
+  }
+  function renderLog() {
+    if (S.bis) S.lastLog = S.bis.log;
+    $('bis-log').innerHTML = (S.lastLog || []).slice(0, 12).map(e =>
+      `<li><span>h = ${e.h.toFixed(5)}</span><span class="${e.pinned ? 'pin' : 'esc'}">${e.pinned ? t('pinned') : t('depinned')}</span><span>${e.n} b</span></li>`).join('');
+  }
+
+  // UI
+  function setH(v, mark = true) {
+    S.h = v; $('h-range').value = v; $('h-num').value = v.toFixed(4);
+    if (mark) markAll();
+  }
+  function syncUI() {
+    const busy = !!S.bis;
+    for (const id of ['h-range', 'h-num', 'd-range', 'blocks', 'size', 'flat', 'sample', 'preset-iso', 'preset-8x1', 'pause']) $(id).disabled = busy;
+    $('bisect').textContent = busy ? t('cancel') : t('find');
+    $('pause').textContent = S.running ? t('pause') : t('resume');
+    $('ro-seed').textContent = S.seed;
+  }
+  function setBlocks(v) { const [a, b] = v.split('x').map(Number); S.AX = a; S.AY = b; }
+  function speedOf(v) { return Math.max(1, Math.round(Math.pow(10, v / 100 * 2.7))); }
+
+  $('h-range').addEventListener('input', e => setH(+e.target.value));
+  $('h-num').addEventListener('change', e => { const v = Math.min(0.08, Math.max(0, +e.target.value || 0)); setH(v); });
+  $('d-range').addEventListener('input', e => { S.D = +e.target.value; $('d-out').textContent = S.D.toFixed(2); buildP(); markAll(); });
+  $('blocks').addEventListener('change', e => { setBlocks(e.target.value); buildP(); markAll(); });
+  $('size').addEventListener('change', e => { S.L = +e.target.value; S.LY = LYof[S.L]; alloc(); flatWall(); S.vHist.length = 0; resize(); });
+  function renderSpeed() { $('speed-out').textContent = `${S.speed} ${t('perFrame')}`; }
+  $('speed').addEventListener('input', e => { S.speed = speedOf(+e.target.value); renderSpeed(); });
+  $('show-dis').addEventListener('change', e => { S.showDis = e.target.checked; });
+  $('pause').addEventListener('click', () => { S.running = !S.running; syncUI(); });
+  $('flat').addEventListener('click', () => { flatWall(); S.vHist.length = 0; });
+  $('sample').addEventListener('click', () => { S.seed = 1 + Math.floor(Math.random() * 99999); buildP(); markAll(); syncUI(); });
+  $('bisect').addEventListener('click', () => { S.bis ? cancelBis() : startBis(); });
+  function preset(blocks, D, h) {
+    $('blocks').value = blocks; setBlocks(blocks); S.D = D; $('d-range').value = D; $('d-out').textContent = D.toFixed(2);
+    flatWall(); setH(h); S.vHist.length = 0;
+  }
+  $('preset-iso').addEventListener('click', () => preset('1x1', 0.2, 0.012));
+  $('preset-8x1').addEventListener('click', () => preset('8x1', 0.2, 0.021));
+
+  // colours
+  let tok = {};
+  function readTokens() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ['accent', 'trace', 'muted', 'line', 'ink']) tok[k] = cs.getPropertyValue('--' + k).trim();
+  }
+  const lut = new Uint8Array(256 * 3);
+  (() => {
+    const neg = [221, 227, 234], mid = [122, 150, 186], pos = [30, 58, 104];
+    for (let k = 0; k < 256; k++) {
+      const t = k / 255, a = t < 0.5 ? neg : mid, b = t < 0.5 ? mid : pos, f = t < 0.5 ? t * 2 : t * 2 - 1;
+      for (let j = 0; j < 3; j++) lut[k * 3 + j] = Math.round(a[j] + (b[j] - a[j]) * f);
+    }
+  })();
+
+  // velocity trace (plain canvas)
+  const chart = $('chart'), cx = chart.getContext('2d');
+  function drawChart() {
+    const dpr = window.devicePixelRatio || 1, w = chart.clientWidth, hgt = chart.clientHeight;
+    if (chart.width !== Math.round(w * dpr)) { chart.width = Math.round(w * dpr); chart.height = Math.round(hgt * dpr); }
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, w, hgt);
+    const v = S.vHist, vmax = Math.max(0.02, ...v) * 1.1;
+    cx.strokeStyle = tok.line; cx.lineWidth = 1;
+    for (const f of [0, 0.5, 1]) { const y = hgt - 4 - f * (hgt - 10); cx.beginPath(); cx.moveTo(0, y + 0.5); cx.lineTo(w, y + 0.5); cx.stroke(); }
+    if (v.length > 1) {
+      cx.beginPath();
+      for (let k = 0; k < v.length; k++) {
+        const x = w * k / 599, y = hgt - 4 - Math.max(0, v[k]) / vmax * (hgt - 10);
+        k ? cx.lineTo(x, y) : cx.moveTo(x, y);
+      }
+      cx.strokeStyle = tok.trace; cx.lineWidth = 1.5; cx.stroke();
+      const lx = w * (v.length - 1) / 599, ly = hgt - 4 - Math.max(0, v[v.length - 1]) / vmax * (hgt - 10);
+      cx.fillStyle = tok.accent; cx.beginPath(); cx.arc(lx, ly, 3, 0, 2 * Math.PI); cx.fill();
+    }
+    $('vmax').textContent = `${t('scale')} ${vmax.toFixed(3)}`;
+  }
+
+  // p5 field view
+  let pp = null, img = null;
+  function resize() {
+    if (!pp) return;
+    const w = $('field').clientWidth || 800;
+    pp.resizeCanvas(w, Math.round(w * S.LY / S.L));
+    img = pp.createImage(S.L, S.LY);
+  }
+  function statusText() {
+    if (S.bis) return ['busy', t('searching') + S.bis.h.toFixed(5)];
+    if (!S.running) return ['paused', t('paused')];
+    return S.quiet >= C.pinRun ? ['pinned', t('pinned')] : ['moving', t('moving')];
+  }
+
+  new p5(p => {
+    pp = p;
+    p.setup = () => {
+      p.pixelDensity(1);
+      const w = $('field').clientWidth || 800;
+      p.createCanvas(w, Math.round(w * S.LY / S.L)).parent('field');
+      p.noSmooth();
+      img = p.createImage(S.L, S.LY);
+      readTokens();
+    };
+    p.windowResized = resize;
+    p.draw = () => {
+      if (S.running) step();
+      measure();
+      if (S.running) comove();
+      const uAbs = S.uMean + S.off;
+      if (S.running) {
+        if (S.lastU !== null && S.sweeps > S.lastN) S.vel = 0.8 * S.vel + 0.2 * (uAbs - S.lastU) / (S.sweeps - S.lastN);
+        else if (S.quiet >= C.pinRun) S.vel *= 0.8;
+        S.lastU = uAbs; S.lastN = S.sweeps;
+        S.vHist.push(S.vel); if (S.vHist.length > 600) S.vHist.shift();
+      }
+      if (p.frameCount % 60 === 1) readTokens();
+
+      const { L, LY, phi, pA, D } = S, px = (img.loadPixels(), img.pixels), dis = S.showDis && D > 0;
+      for (let y = 0; y < LY; y++) {
+        const ro = (LY - 1 - y) * L;
+        for (let x = 0; x < L; x++) {
+          const i = y * L + x, o = (ro + x) * 4;
+          let k = ((phi[i] + 1.15) / 2.3 * 255) | 0; k = k < 0 ? 0 : k > 255 ? 255 : k;
+          const g = dis ? 1 - 0.32 * (3 - pA[i]) / D : 1;
+          px[o] = lut[k * 3] * g; px[o + 1] = lut[k * 3 + 1] * g; px[o + 2] = lut[k * 3 + 2] * g; px[o + 3] = 255;
+        }
+      }
+      img.updatePixels();
+      p.image(img, 0, 0, p.width, p.height);
+      const sx = p.width / L, sy = p.height / LY;
+      if (S.bis) {
+        p.stroke(tok.muted); p.strokeWeight(1); p.drawingContext.setLineDash([5, 5]);
+        for (const yy of [C.y0, C.y0 + C.P]) p.line(0, p.height - (yy + 0.5) * sy, p.width, p.height - (yy + 0.5) * sy);
+        p.drawingContext.setLineDash([]);
+      }
+      p.noFill(); p.stroke(tok.accent); p.strokeWeight(Math.max(1.5, sx * 0.6));
+      p.beginShape();
+      for (let x = 0; x < L; x++) p.vertex((x + 0.5) * sx, p.height - (S.u[x] + 0.5) * sy);
+      p.endShape();
+
+      if (p.frameCount % 3 === 0) {
+        const [s, txt] = statusText(), st = $('status');
+        st.dataset.s = s; st.textContent = txt;
+        $('ro-h').textContent = S.h.toFixed(4);
+        $('ro-u').textContent = uAbs.toFixed(1);
+        $('ro-w').textContent = S.uW.toFixed(2);
+        $('ro-v').textContent = S.vel.toFixed(4);
+        $('ro-n').textContent = S.sweeps.toLocaleString(t('locale'));
+        drawChart();
+      }
+    };
+  });
+
+  function applyLang(l) {
+    lang = l; document.documentElement.lang = l; document.title = t('title');
+    for (const el of document.querySelectorAll('[data-i18n]')) el.innerHTML = t(el.dataset.i18n);
+    for (const el of document.querySelectorAll('[data-i18n-aria]')) el.setAttribute('aria-label', t(el.dataset.i18nAria));
+    for (const b of document.querySelectorAll('[data-lang]')) b.setAttribute('aria-pressed', String(b.dataset.lang === l));
+    try { localStorage.setItem('pared-phi4-lang', l); } catch (e) {}
+    syncUI(); renderSpeed(); renderLog(); renderResult(); renderHistory();
+    const [s, txt] = statusText(); $('status').dataset.s = s; $('status').textContent = txt;
+  }
+  for (const b of document.querySelectorAll('[data-lang]')) b.addEventListener('click', () => applyLang(b.dataset.lang));
+
+  alloc(); setBlocks('8x1'); flatWall();
+  S.speed = speedOf(+$('speed').value);
+  applyLang(lang);
+})();
+</script>
+
+</body></html>
