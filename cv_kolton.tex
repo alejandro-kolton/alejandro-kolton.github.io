@@ -1,0 +1,158 @@
+% CV de Alejandro B. Kolton
+% Compilar con: pdflatex cv_kolton.tex
+% La lista completa de publicaciones vive en https://alejandro-kolton.github.io/publications.html
+% (se genera sola desde arXiv), así que acá solo van las seleccionadas.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{charter}
+\usepackage[scaled=0.92]{helvet}
+\usepackage[margin=2cm,top=1.6cm,bottom=1.8cm]{geometry}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Colores (el mismo azul que la web) ----------
+\definecolor{accent}{HTML}{1F5F8B}
+\definecolor{muted}{HTML}{666666}
+
+% ---------- Estilo ----------
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\hypersetup{colorlinks=true, urlcolor=accent, linkcolor=accent}
+
+\titleformat{\section}
+{\sffamily\large\bfseries\color{accent}}{}{0pt}{}[\vspace{2pt}{\color{accent!40}\titlerule[0.6pt]}]
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+
+\setlist[itemize]{leftmargin=1.1em, itemsep=2pt, topsep=2pt, label={\color{accent}\textbullet}}
+
+% Entrada con fecha a la izquierda: \entry{fecha}{título}{detalle}
+\newlength{\datecol}\setlength{\datecol}{2.1cm}
+\newcommand{\entry}[3]{%
+\noindent\makebox[\datecol][l]{\color{muted}\small #1}%
+\parbox[t]{\dimexpr\linewidth-\datecol\relax}{\raggedright\textbf{#2}%
+\if\relax\detokenize{#3}\relax\else\\ #3\fi}\par\vspace{5pt}}
+
+\newcommand{\pub}[3]{\item #1\\{\small\color{muted}#2 --- \emph{#3}}}
+
+\begin{document}
+
+% ================= Encabezado =================
+{\sffamily\fontsize{24}{28}\selectfont\bfseries Alejandro B. Kolton}\par
+\vspace{4pt}
+{\large\color{accent} Physicist --- non-equilibrium disordered systems and computational statistical physics}\par
+\vspace{8pt}
+{\small
+Centro Atómico Bariloche, Av.\ E.\ Bustillo 9500, R8402AGP San Carlos de Bariloche, Argentina\\[2pt]
+\href{mailto:alejandro.kolton@ib.edu.ar}{alejandro.kolton@ib.edu.ar}
+\enspace{\color{muted}·}\enspace \href{https://alejandro-kolton.github.io}{alejandro-kolton.github.io}
+\enspace{\color{muted}·}\enspace ORCID \href{https://orcid.org/0000-0002-9050-5859}{0000-0002-9050-5859}
+\enspace{\color{muted}·}\enspace \href{https://scholar.google.com.ar/citations?user=CdVkVOEAAAAJ}{Google Scholar}
+}
+
+% ================= Cargos =================
+\section{Positions}
+\entry{2022--}{Professor (Profesor Adjunto), Instituto Balseiro}{Universidad Nacional de Cuyo (UNCUYO), Bariloche, Argentina.}
+\entry{2007--}{Principal Researcher, CONICET}{Condensed Matter Theory group, Centro Atómico Bariloche, Argentina. Permanent researcher since 10/2007.}
+\entry{2006--2007}{Postdoctoral researcher, Universidad Complutense de Madrid}{J.\,M.\,R.\ Parrondo group, Dep.\ de Física Atómica, Molecular y Nuclear, Spain.}
+\entry{2003--2006}{Postdoctoral researcher and Maître assistant, Université de Genève}{T.\ Giamarchi group, DPMC, Switzerland.}
+
+% ================= Formación =================
+\section{Education}
+\entry{2003}{PhD in Physics, Instituto Balseiro}{Thesis: \href{http://ricabib.cab.cnea.gov.ar/280/}{\emph{Nonequilibrium dynamics in vortex systems in superconductors}}.\\ 2nd J.\,J.\ Giambiagi Prize for the PhD thesis, Asociación Física Argentina.}
+\entry{1998}{Master in Physics (Licenciatura), Instituto Balseiro}{}
+
+% ================= Estadías =================
+\section{Visiting positions}
+\entry{2018}{LPTMS, Université Paris-Saclay, France}{}
+\entry{2016}{LiPhy, Université Grenoble Alpes, France}{}
+\entry{2013}{École Normale Supérieure, Paris, France}{}
+\entry{2011}{Dept.\ de Física Fonamental, Universitat de Barcelona, Spain}{}
+
+% ================= Investigación =================
+\section{Research interests}
+Driven extended systems in disordered landscapes: domain walls in ferromagnets and ferroelectrics,
+vortices in superconductors, magnetic skyrmions, amorphous solids, earthquakes, electronic glasses,
+cold atoms, propagation of epidemics and forest fires, active matter.
+Disordered elastic systems, out-of-equilibrium glassy dynamics, stochastic thermodynamics,
+computational statistical physics and GPU computing.
+
+% ================= Publicaciones =================
+\section{Publications}
+Over 90 papers in international journals, including Phys.\ Rev.\ Lett., Phys.\ Rev.\ B/E, J.\ Stat.\ Mech.,
+Communications Physics and Communications Materials.
+Google Scholar: 3462 citations, h-index 34.\\[2pt]
+Full, up-to-date list: \href{https://alejandro-kolton.github.io/publications.html}{alejandro-kolton.github.io/publications.html}
+
+\medskip
+\textbf{Selected publications}
+\begin{itemize}
+\pub{Depinning free of the elastic approximation}
+{A.\,B.\ Kolton, E.\,E.\ Ferrero, A.\ Rosso}{Phys.\ Rev.\ B 108, 174201 (2023)}
+\pub{Universal pinning energy barrier for driven domain walls in thin ferromagnetic films}
+{V.\ Jeudy, A.\ Mougin, S.\ Bustingorry, W.\ Savero Torres, J.\ Gorchon, A.\,B.\ Kolton, A.\ Lemaître, J.-P.\ Jamet}{Phys.\ Rev.\ Lett.\ 117, 057201 (2016)}
+\pub{Creep dynamics of elastic manifolds via exact transition pathways}
+{A.\,B.\ Kolton, A.\ Rosso, T.\ Giamarchi, W.\ Krauth}{Phys.\ Rev.\ B 79, 184207 (2009)}
+\pub{Mode locking in ac-driven vortex lattices with random pinning}
+{A.\,B.\ Kolton, D.\ Domínguez, N.\ Grønbech-Jensen}{Phys.\ Rev.\ Lett.\ 86, 4112 (2001)}
+\pub{Hall noise and transverse freezing in driven vortex lattices}
+{A.\,B.\ Kolton, D.\ Domínguez, N.\ Grønbech-Jensen}{Phys.\ Rev.\ Lett.\ 83, 3061 (1999)}
+\end{itemize}
+
+\medskip
+\textbf{Patent.} \emph{Soporte magnético para la grabación y lectura de información y su uso},
+A.\ Pérez-Junquera, V.\,I.\ Marconi, A.\,B.\ Kolton \emph{et al.}, ES2406182 A2 (2013).
+
+% ================= Charlas =================
+\section{Recent invited talks}
+\entry{2026}{Avalanche 2026 workshop, Anacapri, Italy}{\emph{Universal collective creep and avalanches of magnetic domain walls: bridging theory, numerics, and experiment}.}
+\entry{2026}{ICTP-SAIFR Workshop on Non-equilibrium Statistical Physics, São Paulo, Brazil}{\emph{When driven interfaces go wild: chaos and roughening without disorder}.}
+\entry{2026}{LAFMAT, Latin American Network of Condensed Matter Physics and Materials Science}{\emph{Spatio-temporal chaos in field-driven magnetic domain walls}.}
+{\small\color{muted} More talks and slides: \href{https://alejandro-kolton.github.io/talks.html}{alejandro-kolton.github.io/talks.html}}
+
+% ================= Docencia =================
+\section{Teaching}
+\begin{itemize}
+\item Instituto Balseiro: Statistical Mechanics; Introduction to Numerical Computing on Graphics Processors (GPUs).
+\item Invited teacher, Erasmus Mundus Master in Complex Systems Science, Université Paris Diderot (2015).
+\item Maître assistant, Université de Genève (2003--2006).
+\end{itemize}
+
+% ================= Dirección =================
+\section{Supervision}
+\textbf{Current:}
+E.\,F.\ Pusiol (PhD, 2025--);
+A.\,M.\ Cámara (PhD, co-advisor, 2025--);
+M.\,E.\ Romano (PhD, co-advisor with J.\ Curiale, 2026--).\\[2pt]
+\textbf{Past:}
+P.\ Domenichini (postdoc, 2022--2025);
+A.\ Gonzalez (PhD, 2023--2024);
+F.\ Elías (PhD, 2017--2023);
+V.\,H.\ Purrello (PhD, 2015--2020);
+E.\,E.\ Ferrero (postdoc, 2011--2013).
+{\small\color{muted} All CONICET fellowships.}
+
+% ================= Gestión y extensión =================
+\section{Service and outreach}
+\begin{itemize}
+\item Chair, \emph{Yielding Phenomena in Disordered Systems} conference, Instituto Balseiro (2019).
+\item Chair, \emph{Third Argentinean School of GPGPU Computing for Scientific Applications}, Instituto Balseiro (2014).
+\item Low-cost CO\textsubscript{2} meters to reduce indoor COVID-19 contagion risk: open hardware design with
+pedagogical instructions for technical high schools, Instituto Balseiro extension project (2021).
+\href{https://github.com/droyktton/medidorCO2}{github.com/droyktton/medidorCO2}
+\end{itemize}
+
+% ================= Idiomas =================
+\section{Languages}
+Spanish (native), English, French.
+
+\vfill
+{\footnotesize\color{muted} Last updated: November 2026}
+
+\end{document}
