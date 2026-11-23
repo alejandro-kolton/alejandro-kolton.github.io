@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   update:
@@ -22,6 +23,32 @@ jobs:
 
       - name: Generar lista desde arXiv
         run: python3 scripts/update_pubs.py
+        env:
+          JREF_REPORT: ${{ runner.temp }}/jref.md
+
+      # Avisa (con un issue, que GitHub manda por mail) cuando un trabajo ya
+      # publicado tiene volumen/página en Crossref pero le falta la journal-ref en arXiv.
+      - name: Issue de journal-refs pendientes en arXiv
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ runner.temp }}/jref.md
+        run: |
+          TITLE="Journal-refs pendientes en arXiv"
+          NUM=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number,title \
+                --jq ".[] | select(.title == \"$TITLE\") | .number" | head -1)
+          if [ -s "$REPORT" ]; then
+            if [ -z "$NUM" ]; then
+              gh issue create --title "$TITLE" --body-file "$REPORT"
+            else
+              OLD=$(gh issue view "$NUM" --json body --jq .body)
+              if [ "$OLD" != "$(cat "$REPORT")" ]; then
+                gh issue edit "$NUM" --body-file "$REPORT"
+                gh issue comment "$NUM" --body "La lista cambió (hay trabajos recién publicados o ya corregidos)."
+              fi
+            fi
+          elif [ -n "$NUM" ]; then
+            gh issue close "$NUM" --comment "Ya no hay journal-refs pendientes."
+          fi
 
       - name: Commit si hubo cambios
         run: |

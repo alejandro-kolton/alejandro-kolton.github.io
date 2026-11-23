@@ -19,6 +19,7 @@ Uso:  python3 scripts/update_pubs.py
 """
 import html
 import json
+import os
 import unicodedata
 import re
 import sys
@@ -94,6 +95,8 @@ def parse(entry):
         "authors": authors,
         "journal": text(entry, "x:journal_ref"),
         "doi": text(entry, "x:doi"),
+        "arxiv_has_jref": bool(text(entry, "x:journal_ref")),
+        "arxiv_has_doi": bool(text(entry, "x:doi")),
     }
 
 
@@ -235,6 +238,37 @@ def render(papers, lang):
     return "\n".join(lines)
 
 
+def write_jref_report(papers):
+    """Lista los trabajos ya publicados (con volumen en Crossref) cuya journal-ref
+    falta en arXiv. Se escribe en el archivo de la variable JREF_REPORT, si está
+    definida; el workflow lo usa para abrir o actualizar un issue."""
+    out = os.environ.get("JREF_REPORT")
+    if not out:
+        return
+    rows = []
+    for p in papers:
+        if p["arxiv_has_jref"] or not p["doi"]:
+            continue
+        m = crossref_work(p["doi"])
+        if not m or not m.get("volume"):
+            continue  # aceptado pero sin versión final todavía
+        doi = p["doi"].split()[0]
+        falta = "journal-ref" if p["arxiv_has_doi"] else "journal-ref y DOI"
+        rows.append(f'| [{p["id"]}](https://arxiv.org/abs/{p["id"]}) | {p["title"]} '
+                    f'| `{p["journal"]}` | `{doi}` | {falta} |')
+    if not rows:
+        Path(out).write_text("", encoding="utf-8")
+        return
+    Path(out).write_text(
+        "Estos trabajos ya están publicados, pero en arXiv les falta la referencia de la revista. "
+        "Se agrega desde https://arxiv.org/user/ → *Journal ref* (no crea una versión nueva).\n\n"
+        "| arXiv | Título | Journal-ref | DOI | Falta en arXiv |\n|---|---|---|---|---|\n"
+        + "\n".join(rows) + "\n\n"
+        "_Issue generado por el workflow semanal; se cierra solo cuando la lista queda vacía._\n",
+        encoding="utf-8",
+    )
+
+
 def main():
     papers = [p for p in (parse(e) for e in fetch_all()) if p]
     if not papers:
@@ -270,6 +304,7 @@ def main():
         if new != page:
             path.write_text(new, encoding="utf-8")
             print(f"Actualizado {path.relative_to(ROOT)}")
+    write_jref_report(papers)
     print(f"{len(papers)} papers.")
 
 
