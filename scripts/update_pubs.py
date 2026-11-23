@@ -10,6 +10,7 @@ ninguno de los dos (no siempre se actualiza arXiv al publicar). Para esos se
 consulta Crossref: con el DOI se obtiene revista/volumen/página/año, y sin DOI se
 busca un artículo publicado con exactamente el mismo título y un autor Kolton.
 Si la revista cambió el título, el DOI se puede asignar a mano en scripts/dois.txt.
+Para los trabajos publicados se muestra el título publicado (según Crossref).
 
 Reescribe solo lo que está entre <!-- PUBS:START --> y <!-- PUBS:END --> en
 publications.html y es/publications.html; el resto de la página se edita a mano.
@@ -134,12 +135,40 @@ def crossref_ref(m):
     return ref, year
 
 
+_works = {}
+
+
+def crossref_work(doi):
+    doi = doi.split()[0]
+    if doi not in _works:
+        data = get_json(f"{CROSSREF}/{urllib.parse.quote(doi)}")
+        _works[doi] = data["message"] if data else None
+        time.sleep(1)
+    return _works[doi]
+
+
+def published_title(p):
+    """Título con que se publicó el trabajo, si difiere del de arXiv.
+
+    Solo se reemplaza si cambian las palabras (no por mayúsculas o puntuación),
+    y se deja el de arXiv si el de Crossref trae marcado (MathML, <i>, etc.).
+    """
+    m = crossref_work(p["doi"])
+    titles = (m or {}).get("title") or []
+    if not titles:
+        return p["title"]
+    t = " ".join(html.unescape(titles[0]).split())
+    if "<" in t or norm_title(t) == norm_title(p["title"]):
+        return p["title"]
+    return t
+
+
 def complete_from_crossref(p):
     """Completa revista y DOI de un paper que en arXiv figura sin journal_ref."""
     if p["doi"]:
-        data = get_json(f'{CROSSREF}/{urllib.parse.quote(p["doi"].split()[0])}')
-        if data:
-            p["journal"], _ = crossref_ref(data["message"])
+        m = crossref_work(p["doi"])
+        if m:
+            p["journal"], _ = crossref_ref(m)
         return
     query = urllib.parse.urlencode({
         "query.bibliographic": p["title"],
@@ -225,6 +254,11 @@ def main():
                 print(f'Crossref: {p["id"]} -> {p["journal"]}')
             time.sleep(1)
         p["year"] = journal_year(p["journal"], p["arxiv_year"])
+        if p["doi"] and p["journal"]:
+            title = published_title(p)
+            if title != p["title"]:
+                print(f'Título publicado: {p["id"]} -> {title}')
+                p["title"] = title
     for lang, path in PAGES.items():
         page = path.read_text(encoding="utf-8")
         new = re.sub(
