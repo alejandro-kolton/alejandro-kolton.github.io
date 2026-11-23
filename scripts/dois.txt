@@ -1,0 +1,4 @@
+# DOIs asignados a mano, para trabajos publicados cuyo DOI no figura en arXiv
+# y que Crossref no encuentra por título (p. ej. porque la revista cambió el título).
+# Formato: <id de arXiv> <DOI>    (revista, volumen, página y año se toman de Crossref)
+2606.12190 10.1103/4qq6-fty8

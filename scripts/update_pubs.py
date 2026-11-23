@@ -9,6 +9,7 @@ Muchos trabajos tienen en arXiv el DOI pero no la referencia de la revista, o
 ninguno de los dos (no siempre se actualiza arXiv al publicar). Para esos se
 consulta Crossref: con el DOI se obtiene revista/volumen/página/año, y sin DOI se
 busca un artículo publicado con exactamente el mismo título y un autor Kolton.
+Si la revista cambió el título, el DOI se puede asignar a mano en scripts/dois.txt.
 
 Reescribe solo lo que está entre <!-- PUBS:START --> y <!-- PUBS:END --> en
 publications.html y es/publications.html; el resto de la página se edita a mano.
@@ -33,6 +34,7 @@ API = "https://export.arxiv.org/api/query"
 NS = {"a": "http://www.w3.org/2005/Atom", "x": "http://arxiv.org/schemas/atom"}
 PAGE_SIZE = 100
 CROSSREF = "https://api.crossref.org/works"
+MANUAL_DOIS = ROOT / "scripts" / "dois.txt"
 UA = {"User-Agent": "personal-website-publication-list/1.0 (https://github.com/alejandro-kolton/alejandro-kolton.github.io)"}
 
 LABELS = {
@@ -208,7 +210,15 @@ def main():
     papers = [p for p in (parse(e) for e in fetch_all()) if p]
     if not papers:
         sys.exit("arXiv no devolvió ningún paper; no se modifica nada.")
+    manual = {}
+    if MANUAL_DOIS.exists():
+        for line in MANUAL_DOIS.read_text(encoding="utf-8").splitlines():
+            parts = line.split("#")[0].split()
+            if len(parts) >= 2:
+                manual[parts[0]] = parts[1]
     for p in papers:
+        if not p["journal"] and not p["doi"] and p["id"] in manual:
+            p["doi"] = manual[p["id"]]
         if not p["journal"]:
             complete_from_crossref(p)
             if p["journal"]:
