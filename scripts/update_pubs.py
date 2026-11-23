@@ -193,7 +193,7 @@ def complete_from_crossref(p):
 def journal_year(journal, arxiv_year):
     """Año de publicación en la revista; si no se puede leer, el de arXiv."""
     years = re.findall(r"\((\d{4})\)", journal) or re.findall(r"\b(?:19|20)\d{2}\b", journal)
-    for y in reversed(years):
+    for y in years:  # el primero es el de la publicación original (luego vienen errata, etc.)
         # descarta números que no son años (volúmenes, páginas); acepta años
         # anteriores a arXiv por las actas que se suben después de publicadas
         if int(arxiv_year) - 5 <= int(y) <= int(arxiv_year) + 3:
